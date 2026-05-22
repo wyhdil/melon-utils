@@ -1,0 +1,25 @@
+{
+  "name": "melon-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A Melon-focused agent for music metadata and source-list workflows.",
+  "scripts": {
+    "dev": "npm run build && node dist/index.js",
+    "web": "npm run build && node dist/server.js",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "cli": "node dist/index.js",
+    "test": "npm run build && node --test \"dist/**/*.test.js\""
+  },
+  "dependencies": {
+    "openai": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "typescript": "latest"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

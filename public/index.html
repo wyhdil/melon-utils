@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Melon Agent</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <h1>Melon Agent</h1>
+          <p id="active-module-description">先选择功能模块，再发送任务指令。</p>
+        </div>
+        <span class="status-pill">Local</span>
+      </header>
+
+      <nav class="module-nav" aria-label="功能模块">
+        <div id="module-list" class="module-list">
+          <button class="module-button is-active" type="button" data-module-id="album_source">专辑音源</button>
+          <button class="module-button" type="button" data-module-id="melon_identity">melon实名</button>
+          <button class="module-button" type="button" data-module-id="single_source">单曲音源</button>
+          <button class="module-button" type="button" data-module-id="avatar_change">更换头像</button>
+        </div>
+      </nav>
+
+      <section id="messages" class="messages" aria-live="polite">
+        <article class="message assistant">
+          <div class="avatar">M</div>
+          <div class="message-body">
+            <p>当前模块：专辑音源。可以输入：给我 tws 最新专辑的全曲源码。</p>
+          </div>
+        </article>
+      </section>
+
+      <form id="avatar-form" class="avatar-uploader" hidden>
+        <div>
+          <strong>上传头像图片</strong>
+          <p>选择图片后会自动提交到 Melon。Cookie 只从本地服务端读取。</p>
+        </div>
+        <label class="avatar-file-button" for="avatar-file-input">选择图片</label>
+        <input id="avatar-file-input" class="sr-only" type="file" accept="image/*" />
+      </form>
+
+      <form id="chat-form" class="composer">
+        <label class="sr-only" for="message-input">消息</label>
+        <textarea id="message-input" rows="1" placeholder="输入 Melon 相关任务..." autocomplete="off"></textarea>
+        <button id="send-button" type="submit">发送</button>
+      </form>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
