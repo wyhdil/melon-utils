@@ -42,6 +42,38 @@ test("copy button falls back when clipboard writeText rejects", async () => {
   assert.equal(serverCopiedText, "<div>copy me</div>");
 });
 
+test("clicking a code block surface copies its content", async () => {
+  const script = await readFile("public/app.js", "utf8");
+  const document = createFakeDocument();
+  let serverCopiedText = "";
+  const context = createContext({
+    document,
+    navigator: {},
+    fetch: async (_url: string, init: { body?: string }) => {
+      serverCopiedText = JSON.parse(init.body ?? "{}").text;
+      return { ok: true };
+    },
+    window: {
+      setTimeout(callback: () => void) {
+        callback();
+        return 1;
+      },
+    },
+  });
+
+  const responseText = "```regex\n.*songId=31606729\\b.*$\n```";
+  new Script(
+    `${script}\nrenderMessageBody(document.testContainer, ${JSON.stringify(responseText)});`,
+  ).runInContext(context);
+
+  const codeBlock = document.testContainer.findByClassName("code-block");
+  assert.ok(codeBlock);
+
+  await codeBlock.dispatch("click");
+
+  assert.equal(serverCopiedText, ".*songId=31606729\\b.*$");
+});
+
 test("keeps module conversations separate when switching tabs", async () => {
   const script = await readFile("public/app.js", "utf8");
   const document = createFakeDocument();

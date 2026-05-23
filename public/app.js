@@ -344,17 +344,13 @@ function createCodeBlock(language, content) {
   copyButton.className = "copy-button";
   copyButton.type = "button";
   copyButton.textContent = "复制";
-  copyButton.addEventListener("click", async () => {
-    try {
-      await copyText(content);
-      copyButton.textContent = "已复制";
-    } catch {
-      copyButton.textContent = "复制失败";
-    } finally {
-      window.setTimeout(() => {
-        copyButton.textContent = "复制";
-      }, 2400);
-    }
+  copyButton.addEventListener("click", async (event) => {
+    event?.stopPropagation?.();
+    await copyCodeBlock(content, copyButton, wrapper);
+  });
+
+  wrapper.addEventListener("click", async () => {
+    await copyCodeBlock(content, copyButton, wrapper);
   });
 
   const pre = document.createElement("pre");
@@ -369,6 +365,32 @@ function createCodeBlock(language, content) {
   return wrapper;
 }
 
+async function copyCodeBlock(content, copyButton, wrapper) {
+  if (wrapper.dataset.copying === "true") {
+    return;
+  }
+
+  wrapper.dataset.copying = "true";
+
+  try {
+    await copyText(content);
+    copyButton.textContent = "已复制";
+    wrapper.classList.toggle("is-copied", true);
+  } catch {
+    copyButton.textContent = "复制失败";
+  } finally {
+    window.setTimeout(() => {
+      copyButton.textContent = "复制";
+      wrapper.classList.toggle("is-copied", false);
+      wrapper.dataset.copying = "false";
+    }, 1600);
+  }
+}
+
+/*
+  Keep a single browser/server/textarea copy pipeline. Code blocks call this
+  whether the user taps the copy button or the code surface itself.
+*/
 async function copyText(text) {
   if (navigator.clipboard) {
     try {
