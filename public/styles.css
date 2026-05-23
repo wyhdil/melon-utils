@@ -2,19 +2,19 @@
   color-scheme: light;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --bg: #f7f5ef;
+  --bg: #f5f7fb;
   --panel: #ffffff;
-  --text: #1f2933;
-  --muted: #68717d;
-  --border: #e2dfd8;
-  --accent: #007a73;
-  --accent-strong: #00635d;
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --accent: #007aff;
+  --accent-strong: #0066d6;
   --assistant: #ffffff;
-  --user: #e7f3f1;
-  --code-bg: #16171d;
+  --user: #e9f2ff;
+  --code-bg: #181a20;
   --code-text: #f5f7fa;
-  --shadow: 0 -10px 30px rgb(31 41 51 / 10%);
-  --surface: #fbfaf7;
+  --shadow: 0 -12px 34px rgb(17 24 39 / 10%);
+  --surface: #f9fafb;
 }
 
 * {
@@ -27,7 +27,7 @@ body {
   min-height: 100dvh;
   margin: 0;
   background:
-    radial-gradient(circle at 50% -20%, rgb(255 255 255 / 90%), transparent 360px),
+    radial-gradient(circle at 50% -18%, rgb(255 255 255 / 100%), transparent 340px),
     var(--bg);
   color: var(--text);
   overflow: hidden;
@@ -50,6 +50,7 @@ input {
   margin: 0 auto;
   background: var(--panel);
   border-inline: 1px solid var(--border);
+  box-shadow: 0 24px 80px rgb(17 24 39 / 8%);
 }
 
 .topbar {
@@ -57,10 +58,10 @@ input {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 14px 22px;
+  padding: 12px 22px;
   border-bottom: 1px solid var(--border);
-  background: rgb(255 255 255 / 88%);
-  backdrop-filter: blur(18px);
+  background: rgb(255 255 255 / 86%);
+  backdrop-filter: blur(20px) saturate(180%);
 }
 
 .topbar h1 {
@@ -81,15 +82,16 @@ input {
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 4px 10px;
-  background: #f6f6f4;
+  background: #f3f4f6;
   color: var(--muted);
   font-size: 12px;
 }
 
 .module-nav {
-  padding: 10px 22px 12px;
+  padding: 8px 22px;
   border-bottom: 1px solid var(--border);
-  background: var(--surface);
+  background: rgb(249 250 251 / 86%);
+  backdrop-filter: blur(20px) saturate(180%);
 }
 
 .module-list {
@@ -102,65 +104,36 @@ input {
 
 .module-button {
   flex: 0 0 auto;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  min-height: 40px;
-  padding: 8px 13px;
-  background: rgb(255 255 255 / 82%);
-  color: var(--text);
+  border: 0;
+  border-radius: 999px;
+  min-height: 36px;
+  padding: 8px 14px;
+  background: #eef0f4;
+  color: #374151;
   cursor: pointer;
   font-size: 13px;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .module-button:hover {
-  border-color: var(--accent);
+  background: #e5e7eb;
 }
 
 .module-button.is-active {
-  border-color: var(--accent);
   background: var(--accent);
   color: #ffffff;
   font-weight: 700;
-}
-
-.suggestion-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  overflow-x: hidden;
-  margin-top: 10px;
-  padding-bottom: 2px;
-}
-
-.suggestion-list[hidden] {
-  display: none;
-}
-
-.suggestion-button {
-  flex: 0 0 auto;
-  max-width: 100%;
-  min-height: 36px;
-  border: 1px solid #c9ddd8;
-  border-radius: 999px;
-  padding: 7px 12px;
-  background: #eef8f6;
-  color: #17443f;
-  cursor: pointer;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 12px;
-}
-
-.suggestion-button:hover {
-  border-color: var(--accent);
+  box-shadow: 0 6px 16px rgb(0 122 255 / 24%);
 }
 
 .messages {
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0;
-  padding: 18px 22px 22px;
+  padding: 16px 22px 22px;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
 }
@@ -205,12 +178,12 @@ input {
   max-width: 760px;
   min-width: 0;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 16px;
   padding: 12px 14px;
   background: var(--assistant);
   line-height: 1.55;
   white-space: normal;
-  box-shadow: 0 1px 2px rgb(31 41 51 / 4%);
+  box-shadow: 0 8px 24px rgb(17 24 39 / 5%);
 }
 
 .message-body p {
@@ -221,7 +194,7 @@ input {
 .code-block {
   overflow: hidden;
   margin-top: 10px;
-  border-radius: 8px;
+  border-radius: 14px;
   background: var(--code-bg);
   cursor: pointer;
   transition:
@@ -231,7 +204,7 @@ input {
 }
 
 .code-block.is-copied {
-  box-shadow: 0 0 0 3px rgb(0 122 115 / 22%);
+  box-shadow: 0 0 0 3px rgb(0 122 255 / 22%);
 }
 
 .code-header {
@@ -247,8 +220,8 @@ input {
 }
 
 .copy-button {
-  border: 1px solid rgb(255 255 255 / 20%);
-  border-radius: 6px;
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 999px;
   min-width: 56px;
   min-height: 34px;
   padding: 6px 10px;
@@ -286,8 +259,8 @@ code {
   gap: 10px;
   padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
   border-top: 1px solid var(--border);
-  background: rgb(251 250 247 / 92%);
-  backdrop-filter: blur(18px);
+  background: rgb(249 250 251 / 88%);
+  backdrop-filter: blur(20px) saturate(180%);
   box-shadow: var(--shadow);
 }
 
@@ -335,24 +308,24 @@ textarea {
   min-height: 44px;
   max-height: 160px;
   resize: none;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 1px solid #d9dde5;
+  border-radius: 16px;
   padding: 11px 12px;
   outline: none;
   color: var(--text);
-  background: rgb(255 255 255 / 92%);
+  background: rgb(255 255 255 / 94%);
 }
 
 textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgb(15 118 110 / 16%);
+  box-shadow: 0 0 0 4px rgb(0 122 255 / 14%);
 }
 
 #send-button {
   min-width: 76px;
   min-height: 44px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 16px;
   padding: 0 18px;
   background: var(--accent);
   color: #ffffff;
@@ -386,7 +359,7 @@ textarea:focus {
 
   .topbar {
     gap: 10px;
-    padding: 12px 14px 10px;
+    padding: 10px 14px 8px;
   }
 
   .topbar h1 {
@@ -407,30 +380,18 @@ textarea:focus {
   }
 
   .module-nav {
-    padding: 9px 12px 10px;
+    padding: 8px 12px;
   }
 
   .module-button {
     flex: 1 1 calc(50% - 4px);
-    min-height: 42px;
-    padding-inline: 14px;
-    font-size: 14px;
-  }
-
-  .suggestion-list {
-    margin-top: 8px;
-  }
-
-  .suggestion-button {
-    flex: 1 1 100%;
-    max-width: 100%;
     min-height: 38px;
-    font-size: 12px;
-    text-align: left;
+    padding-inline: 14px;
+    font-size: 13px;
   }
 
   .messages {
-    padding: 14px 12px 16px;
+    padding: 12px 12px 16px;
   }
 
   .message {
@@ -455,6 +416,7 @@ textarea:focus {
     padding: 11px 12px;
     line-height: 1.5;
     font-size: 15px;
+    border-radius: 15px;
   }
 
   .composer {
@@ -483,6 +445,7 @@ textarea:focus {
     max-height: 132px;
     padding: 12px;
     font-size: 16px;
+    border-radius: 16px;
   }
 
   .code-block {

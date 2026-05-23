@@ -307,7 +307,6 @@ class FakeDocument {
   readonly avatarFileInput = new FakeElement("input", this);
   readonly messages = new FakeElement("section", this);
   readonly moduleList = new FakeElement("div", this);
-  readonly suggestionList = new FakeElement("div", this);
   readonly sendButton = new FakeElement("button", this);
   readonly body = new FakeElement("body", this);
   readonly testContainer = new FakeElement("div", this);
@@ -342,10 +341,6 @@ class FakeDocument {
 
     if (selector === "#module-list") {
       return this.moduleList;
-    }
-
-    if (selector === "#suggestion-list") {
-      return this.suggestionList;
     }
 
     if (selector === "#active-module-description") {
