@@ -6,9 +6,37 @@ const moduleList = document.querySelector("#module-list");
 const activeModuleDescription = document.querySelector("#active-module-description");
 const avatarForm = document.querySelector("#avatar-form");
 const avatarFileInput = document.querySelector("#avatar-file-input");
+const singleSourceTools = document.querySelector("#single-source-tools");
 let activeModuleId = "album_source";
 const moduleMetaById = new Map();
 const moduleConversations = new Map();
+const singleSourceRegexTools = [
+  {
+    label: "songId query",
+    note: "改单曲播放次数",
+    value: ".*songId=31606729\\b.*$",
+  },
+  {
+    label: "外层播放次数",
+    note: "TOTALLISTENCNT",
+    value: '"TOTALLISTENCNT":".*?\\"',
+  },
+  {
+    label: "外层首听日",
+    note: "FIRSTLISTENDATE",
+    value: '"FIRSTLISTENDATE":".*?\\"',
+  },
+  {
+    label: "card 次数",
+    note: "MYSTREAMCOUNT",
+    value: '"MYSTREAMCOUNT":".*?\\"',
+  },
+  {
+    label: "card SONGID",
+    note: "改成次数",
+    value: '"SONGID":".*?\\"',
+  },
+];
 
 initializeModules();
 
@@ -156,6 +184,7 @@ function setActiveModule(moduleId) {
 
   syncModuleControls();
   syncInputPlaceholder();
+  renderSingleSourceTools();
   renderActiveConversation();
 }
 
@@ -360,6 +389,68 @@ async function copyCodeBlock(content, copyButton, wrapper) {
       wrapper.classList.toggle("is-copied", false);
       wrapper.dataset.copying = "false";
     }, 1600);
+  }
+}
+
+function renderSingleSourceTools() {
+  if (!singleSourceTools) {
+    return;
+  }
+
+  singleSourceTools.hidden = activeModuleId !== "single_source";
+
+  if (singleSourceTools.children.length > 0) {
+    return;
+  }
+
+  singleSourceTools.replaceChildren(...singleSourceRegexTools.map(createRegexToolCard));
+}
+
+function createRegexToolCard(tool) {
+  const button = document.createElement("button");
+  button.className = "tool-card";
+  button.type = "button";
+  button.setAttribute("aria-label", `复制${tool.label}正则`);
+
+  const title = document.createElement("span");
+  title.className = "tool-card-title";
+  title.textContent = tool.label;
+
+  const note = document.createElement("span");
+  note.className = "tool-card-note";
+  note.textContent = tool.note;
+
+  const value = document.createElement("code");
+  value.className = "tool-card-value";
+  value.textContent = tool.value;
+
+  button.append(title, note, value);
+  button.addEventListener("click", async () => {
+    await copyRegexTool(tool.value, button);
+  });
+
+  return button;
+}
+
+async function copyRegexTool(value, button) {
+  if (button.dataset.copying === "true") {
+    return;
+  }
+
+  button.dataset.copying = "true";
+
+  try {
+    await copyText(value);
+    button.classList.toggle("is-copied", true);
+    button.dataset.status = "已复制";
+  } catch {
+    button.dataset.status = "复制失败";
+  } finally {
+    window.setTimeout(() => {
+      button.classList.toggle("is-copied", false);
+      button.dataset.status = "";
+      button.dataset.copying = "false";
+    }, 1200);
   }
 }
 

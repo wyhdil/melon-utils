@@ -74,6 +74,64 @@ test("clicking a code block surface copies its content", async () => {
   assert.equal(serverCopiedText, ".*songId=31606729\\b.*$");
 });
 
+test("single source regex tool cards copy their regex on tap", async () => {
+  const script = await readFile("public/app.js", "utf8");
+  const document = createFakeDocument();
+  let serverCopiedText = "";
+  const context = createContext({
+    document,
+    navigator: {},
+    fetch: async (url: string, init?: { body?: string }) => {
+      if (url === "/api/modules") {
+        return {
+          ok: true,
+          async json() {
+            return {
+              modules: [
+                {
+                  id: "album_source",
+                  label: "专辑音源",
+                  description: "专辑音源说明",
+                  prompt: "当前模块：专辑音源。",
+                },
+                {
+                  id: "single_source",
+                  label: "单曲音源",
+                  description: "单曲音源说明",
+                  prompt: "当前模块：单曲音源。",
+                },
+              ],
+            };
+          },
+        };
+      }
+
+      serverCopiedText = JSON.parse(init?.body ?? "{}").text;
+      return { ok: true };
+    },
+    window: {
+      setTimeout(callback: () => void) {
+        callback();
+        return 1;
+      },
+    },
+  });
+
+  new Script(script).runInContext(context);
+  await flushPromises();
+
+  const singleSourceButton = document.moduleList.children.find((child) => child.dataset.moduleId === "single_source");
+  assert.ok(singleSourceButton);
+  await singleSourceButton.dispatch("click");
+
+  const toolCards = document.singleSourceTools.findAllByClassName("tool-card");
+  assert.equal(toolCards.length, 5);
+  await toolCards[1].dispatch("click");
+
+  assert.equal(serverCopiedText, '"TOTALLISTENCNT":".*?\\"');
+  assert.equal(document.singleSourceTools.hidden, false);
+});
+
 test("keeps module conversations separate when switching tabs", async () => {
   const script = await readFile("public/app.js", "utf8");
   const document = createFakeDocument();
@@ -200,6 +258,7 @@ class FakeElement {
   className = "";
   dataset: Record<string, string> = {};
   disabled = false;
+  hidden = false;
   innerHTML = "";
   scrollHeight = 44;
   scrollTop = 0;
@@ -307,6 +366,7 @@ class FakeDocument {
   readonly avatarFileInput = new FakeElement("input", this);
   readonly messages = new FakeElement("section", this);
   readonly moduleList = new FakeElement("div", this);
+  readonly singleSourceTools = new FakeElement("section", this);
   readonly sendButton = new FakeElement("button", this);
   readonly body = new FakeElement("body", this);
   readonly testContainer = new FakeElement("div", this);
@@ -357,6 +417,10 @@ class FakeDocument {
 
     if (selector === "#avatar-file-input") {
       return this.avatarFileInput;
+    }
+
+    if (selector === "#single-source-tools") {
+      return this.singleSourceTools;
     }
 
     return null;

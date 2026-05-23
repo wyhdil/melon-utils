@@ -304,6 +304,104 @@ code {
   background: var(--accent-strong);
 }
 
+.tool-cards {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+  background: rgb(249 250 251 / 88%);
+  backdrop-filter: blur(20px) saturate(180%);
+}
+
+.tool-cards[hidden] {
+  display: none;
+}
+
+.tool-card {
+  position: relative;
+  min-width: 0;
+  border: 1px solid #dfe5ee;
+  border-radius: 16px;
+  padding: 10px;
+  background: rgb(255 255 255 / 92%);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgb(17 24 39 / 5%);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.tool-card:hover,
+.tool-card:focus-visible {
+  border-color: rgb(0 122 255 / 42%);
+  box-shadow: 0 10px 28px rgb(0 122 255 / 12%);
+}
+
+.tool-card:active {
+  transform: scale(0.985);
+}
+
+.tool-card.is-copied {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgb(0 122 255 / 14%);
+}
+
+.tool-card::after {
+  content: "点击复制";
+  position: absolute;
+  right: 10px;
+  bottom: 8px;
+  color: #8b95a5;
+  font-size: 10px;
+}
+
+.tool-card[data-status]:not([data-status=""])::after {
+  content: attr(data-status);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.tool-card-title,
+.tool-card-note,
+.tool-card-value {
+  display: block;
+  min-width: 0;
+}
+
+.tool-card-title {
+  overflow: hidden;
+  color: #111827;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tool-card-note {
+  overflow: hidden;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tool-card-value {
+  margin-top: 8px;
+  padding-right: 42px;
+  color: #2d3748;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 10px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
 textarea {
   min-height: 44px;
   max-height: 160px;
@@ -432,6 +530,30 @@ textarea:focus {
 
   .avatar-file-button {
     text-align: center;
+  }
+
+  .tool-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .tool-card {
+    min-height: 82px;
+    padding: 9px;
+    border-radius: 15px;
+  }
+
+  .tool-card-title {
+    font-size: 12px;
+  }
+
+  .tool-card-note {
+    font-size: 10px;
+  }
+
+  .tool-card-value {
+    font-size: 9px;
   }
 
   #send-button {
