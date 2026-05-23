@@ -12,7 +12,7 @@ const moduleMetaById = new Map();
 const moduleConversations = new Map();
 const singleSourceRegexTools = [
   {
-    label: "songId query",
+    label: "songId",
     note: "改单曲播放次数",
     value: ".*songId=31606729\\b.*$",
   },
@@ -27,7 +27,7 @@ const singleSourceRegexTools = [
     value: '"FIRSTLISTENDATE":".*?\\"',
   },
   {
-    label: "card 次数",
+    label: "card次数",
     note: "MYSTREAMCOUNT",
     value: '"MYSTREAMCOUNT":".*?\\"',
   },
@@ -411,20 +411,13 @@ function createRegexToolCard(tool) {
   button.className = "tool-card";
   button.type = "button";
   button.setAttribute("aria-label", `复制${tool.label}正则`);
+  button.title = tool.value;
 
   const title = document.createElement("span");
   title.className = "tool-card-title";
   title.textContent = tool.label;
 
-  const note = document.createElement("span");
-  note.className = "tool-card-note";
-  note.textContent = tool.note;
-
-  const value = document.createElement("code");
-  value.className = "tool-card-value";
-  value.textContent = tool.value;
-
-  button.append(title, note, value);
+  button.append(title);
   button.addEventListener("click", async () => {
     await copyRegexTool(tool.value, button);
   });
@@ -438,17 +431,25 @@ async function copyRegexTool(value, button) {
   }
 
   button.dataset.copying = "true";
+  const title = button.querySelector(".tool-card-title");
+  const originalLabel = title?.textContent || "";
 
   try {
     await copyText(value);
     button.classList.toggle("is-copied", true);
-    button.dataset.status = "已复制";
+    if (title) {
+      title.textContent = "已复制";
+    }
   } catch {
-    button.dataset.status = "复制失败";
+    if (title) {
+      title.textContent = "复制失败";
+    }
   } finally {
     window.setTimeout(() => {
       button.classList.toggle("is-copied", false);
-      button.dataset.status = "";
+      if (title) {
+        title.textContent = originalLabel;
+      }
       button.dataset.copying = "false";
     }, 1200);
   }

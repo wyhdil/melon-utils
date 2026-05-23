@@ -305,13 +305,23 @@ code {
 }
 
 .tool-cards {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
-  padding: 10px 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
   border-top: 1px solid var(--border);
   background: rgb(249 250 251 / 88%);
   backdrop-filter: blur(20px) saturate(180%);
+}
+
+.tool-cards::before {
+  content: "正则";
+  flex: 0 0 auto;
+  margin-right: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .tool-cards[hidden] {
@@ -320,17 +330,20 @@ code {
 
 .tool-card {
   position: relative;
+  flex: 1 1 auto;
   min-width: 0;
+  min-height: 32px;
   border: 1px solid #dfe5ee;
-  border-radius: 16px;
-  padding: 10px;
+  border-radius: 999px;
+  padding: 6px 10px;
   background: rgb(255 255 255 / 92%);
   color: var(--text);
-  text-align: left;
+  text-align: center;
   cursor: pointer;
-  box-shadow: 0 8px 22px rgb(17 24 39 / 5%);
+  box-shadow: 0 4px 12px rgb(17 24 39 / 4%);
   transition:
     border-color 160ms ease,
+    background 160ms ease,
     box-shadow 160ms ease,
     transform 160ms ease;
 }
@@ -346,23 +359,9 @@ code {
 }
 
 .tool-card.is-copied {
+  background: rgb(235 245 255 / 100%);
   border-color: var(--accent);
   box-shadow: 0 0 0 4px rgb(0 122 255 / 14%);
-}
-
-.tool-card::after {
-  content: "点击复制";
-  position: absolute;
-  right: 10px;
-  bottom: 8px;
-  color: #8b95a5;
-  font-size: 10px;
-}
-
-.tool-card[data-status]:not([data-status=""])::after {
-  content: attr(data-status);
-  color: var(--accent);
-  font-weight: 700;
 }
 
 .tool-card-title,
@@ -375,11 +374,15 @@ code {
 .tool-card-title {
   overflow: hidden;
   color: #111827;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.tool-card.is-copied .tool-card-title {
+  color: var(--accent);
 }
 
 .tool-card-note {
@@ -393,13 +396,7 @@ code {
 }
 
 .tool-card-value {
-  margin-top: 8px;
-  padding-right: 42px;
-  color: #2d3748;
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-  font-size: 10px;
-  line-height: 1.35;
-  overflow-wrap: anywhere;
+  display: none;
 }
 
 textarea {
@@ -533,27 +530,24 @@ textarea:focus {
   }
 
   .tool-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    padding: 8px 10px;
+    gap: 6px;
+    padding: 6px 10px;
+  }
+
+  .tool-cards::before {
+    flex-basis: 100%;
+    margin: 0 0 -1px;
+    font-size: 11px;
   }
 
   .tool-card {
-    min-height: 82px;
-    padding: 9px;
-    border-radius: 15px;
+    flex-basis: calc(33.333% - 5px);
+    min-height: 31px;
+    padding: 6px 8px;
   }
 
   .tool-card-title {
-    font-size: 12px;
-  }
-
-  .tool-card-note {
-    font-size: 10px;
-  }
-
-  .tool-card-value {
-    font-size: 9px;
+    font-size: 11px;
   }
 
   #send-button {
