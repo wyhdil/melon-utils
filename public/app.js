@@ -3,6 +3,7 @@ const input = document.querySelector("#message-input");
 const messages = document.querySelector("#messages");
 const sendButton = document.querySelector("#send-button");
 const moduleList = document.querySelector("#module-list");
+const suggestionList = document.querySelector("#suggestion-list");
 const activeModuleDescription = document.querySelector("#active-module-description");
 const avatarForm = document.querySelector("#avatar-form");
 const avatarFileInput = document.querySelector("#avatar-file-input");
@@ -155,6 +156,7 @@ function setActiveModule(moduleId) {
   }
 
   syncModuleControls();
+  renderSuggestions();
   renderActiveConversation();
 }
 
@@ -216,6 +218,57 @@ function getDefaultModulePrompt(module) {
   }
 
   return `当前模块：${module.label}。这个模块待实现，请先告诉我输入和输出规则。`;
+}
+
+function getModuleSuggestions(moduleId) {
+  if (moduleId === "album_source") {
+    return [
+      "给我 tws 最新专辑的全曲源码",
+      "给我 itzy 在0518发行的全专源码",
+      "给我 lessarafim 在0522发行的全专源码",
+    ];
+  }
+
+  if (moduleId === "melon_identity") {
+    return [
+      "test kk,20001010,指定认证日2026.02.02",
+      "SHI YUNLIN, 1991.08.14",
+      "HSU HAHA KE,20010608",
+    ];
+  }
+
+  if (moduleId === "single_source") {
+    return [
+      "itzy, 달라달라，199",
+      "tws，널 따라가 (You, You)",
+      "itzy上一张正规专辑的主打曲",
+    ];
+  }
+
+  return [];
+}
+
+function renderSuggestions() {
+  if (!suggestionList) {
+    return;
+  }
+
+  const suggestions = getModuleSuggestions(activeModuleId);
+  suggestionList.replaceChildren();
+  suggestionList.hidden = suggestions.length === 0;
+
+  for (const suggestion of suggestions) {
+    const button = document.createElement("button");
+    button.className = "suggestion-button";
+    button.type = "button";
+    button.textContent = suggestion;
+    button.addEventListener("click", () => {
+      input.value = suggestion;
+      resizeInput();
+      input.focus();
+    });
+    suggestionList.append(button);
+  }
 }
 
 function createMessageElement(role, text) {
@@ -305,6 +358,7 @@ function createCodeBlock(language, content) {
   });
 
   const pre = document.createElement("pre");
+  pre.setAttribute("tabindex", "0");
   const code = document.createElement("code");
   code.textContent = content;
   pre.append(code);
