@@ -9,7 +9,7 @@ test("chooses identity auth date from four months ago through two months ago", (
   assert.equal(chooseRandomIdentityAuthDate(now, () => 0.999999), "2026.02.28");
 });
 
-test("outputs identity helper fragments before the html template", async () => {
+test("outputs identity helper fragments and original name before the html template", async () => {
   const task = createMelonIdentityTask(new Date(2026, 3, 30), () => 0);
   const result = await task.run("test kk,20001010,指定认证日2026.02.02");
 
@@ -20,12 +20,28 @@ test("outputs identity helper fragments before the html template", async () => {
     content: match.groups?.content.trim(),
   }));
 
-  assert.equal(codeBlocks.length, 3);
-  assert.deepEqual(codeBlocks.map((block) => block.language), ["text", "regex", "html"]);
+  assert.equal(codeBlocks.length, 4);
+  assert.deepEqual(codeBlocks.map((block) => block.language), ["text", "text", "regex", "html"]);
   assert.equal(codeBlocks[0]?.content, "melon-kkt-");
-  assert.equal(codeBlocks[1]?.content, "[\\s\\S]*");
-  assert.match(codeBlocks[2]?.content ?? "", /<dd>TE\*\* KK \(만 25세\)<\/dd>/);
-  assert.match(codeBlocks[2]?.content ?? "", /<dd>2026\.02\.02<\/dd>/);
+  assert.equal(codeBlocks[1]?.content, "test kk");
+  assert.equal(codeBlocks[2]?.content, "[\\s\\S]*");
+  assert.match(codeBlocks[3]?.content ?? "", /<dd>TE\*\* KK \(만 25세\)<\/dd>/);
+  assert.match(codeBlocks[3]?.content ?? "", /<dd>2026\.02\.02<\/dd>/);
+});
+
+test("outputs multiline slash-date identity input with original name as a copy block", async () => {
+  const task = createMelonIdentityTask(new Date(2026, 4, 25), () => 0);
+  const result = await task.run("TOYOSHIMA YU\n2005/08/17");
+
+  assert.equal(result.status, "ok");
+
+  const codeBlocks = Array.from(result.output.matchAll(/```(?<language>[a-zA-Z0-9_-]*)\n(?<content>[\s\S]*?)```/g), (match) => ({
+    language: match.groups?.language,
+    content: match.groups?.content.trim(),
+  }));
+
+  assert.equal(codeBlocks[1]?.content, "TOYOSHIMA YU");
+  assert.match(codeBlocks[3]?.content ?? "", /<dd>TO\*\*\*\*\*\*\* YU \(만 20세\)<\/dd>/);
 });
 
 test("parses common birth date formats from identity input", () => {
