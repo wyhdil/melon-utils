@@ -460,25 +460,24 @@ async function copyRegexTool(value, button) {
   whether the user taps the copy button or the code surface itself.
 */
 async function copyText(text) {
-  if (navigator.clipboard) {
+  if (navigator.clipboard?.writeText) {
     try {
       await navigator.clipboard.writeText(text);
       return;
     } catch {
       // Some embedded browsers expose navigator.clipboard but reject writes.
-      // Fall through to the selection-based copy path.
+      // Fall through to the selection-based copy path while the tap is still fresh.
     }
   }
 
   try {
-    await copyTextWithLocalServer(text);
+    copyTextWithTextarea(text);
     return;
   } catch {
-    // Keep a browser-only fallback for environments where the local server
-    // endpoint is unavailable.
+    // Keep the local server fallback for desktop/local development only.
   }
 
-  copyTextWithTextarea(text);
+  await copyTextWithLocalServer(text);
 }
 
 async function copyTextWithLocalServer(text) {
@@ -498,14 +497,16 @@ function copyTextWithTextarea(text) {
   textarea.value = text;
   textarea.setAttribute("readonly", "");
   textarea.style.position = "fixed";
-  textarea.style.top = "0";
+  textarea.style.top = "-1000px";
   textarea.style.left = "0";
-  textarea.style.width = "1px";
-  textarea.style.height = "1px";
+  textarea.style.width = "2px";
+  textarea.style.height = "2px";
+  textarea.style.fontSize = "16px";
   textarea.style.opacity = "0";
   document.body.append(textarea);
   textarea.focus();
   textarea.select();
+  textarea.setSelectionRange?.(0, textarea.value.length);
   const copied = document.execCommand("copy");
   textarea.remove();
 

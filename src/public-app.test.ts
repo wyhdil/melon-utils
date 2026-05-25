@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { Script, createContext } from "node:vm";
 import test from "node:test";
 
-test("copy button falls back when clipboard writeText rejects", async () => {
+test("copy button falls back to textarea when clipboard writeText rejects", async () => {
   const script = await readFile("public/app.js", "utf8");
   const document = createFakeDocument();
   let serverCopiedText = "";
@@ -39,18 +39,18 @@ test("copy button falls back when clipboard writeText rejects", async () => {
 
   await button.dispatch("click");
 
-  assert.equal(serverCopiedText, "<div>copy me</div>");
+  assert.equal(document.copiedText, "<div>copy me</div>");
+  assert.equal(serverCopiedText, "");
 });
 
 test("clicking a code block surface copies its content", async () => {
   const script = await readFile("public/app.js", "utf8");
   const document = createFakeDocument();
-  let serverCopiedText = "";
   const context = createContext({
     document,
     navigator: {},
     fetch: async (_url: string, init: { body?: string }) => {
-      serverCopiedText = JSON.parse(init.body ?? "{}").text;
+      assert.fail(`server copy should not be used before textarea fallback: ${init.body ?? ""}`);
       return { ok: true };
     },
     window: {
@@ -71,13 +71,12 @@ test("clicking a code block surface copies its content", async () => {
 
   await codeBlock.dispatch("click");
 
-  assert.equal(serverCopiedText, ".*songId=31606729\\b.*$");
+  assert.equal(document.copiedText, ".*songId=31606729\\b.*$");
 });
 
 test("single source regex tool cards copy their regex on tap", async () => {
   const script = await readFile("public/app.js", "utf8");
   const document = createFakeDocument();
-  let serverCopiedText = "";
   const context = createContext({
     document,
     navigator: {},
@@ -106,7 +105,7 @@ test("single source regex tool cards copy their regex on tap", async () => {
         };
       }
 
-      serverCopiedText = JSON.parse(init?.body ?? "{}").text;
+      assert.fail(`server copy should not be used before textarea fallback: ${init?.body ?? ""}`);
       return { ok: true };
     },
     window: {
@@ -128,7 +127,7 @@ test("single source regex tool cards copy their regex on tap", async () => {
   assert.equal(toolCards.length, 5);
   await toolCards[1].dispatch("click");
 
-  assert.equal(serverCopiedText, '"TOTALLISTENCNT":".*?\\"');
+  assert.equal(document.copiedText, '"TOTALLISTENCNT":".*?\\"');
   assert.equal(document.singleSourceTools.hidden, false);
 });
 
@@ -317,6 +316,10 @@ class FakeElement {
   }
 
   select(): void {
+    this.ownerDocument.selectedText = this.value;
+  }
+
+  setSelectionRange(): void {
     this.ownerDocument.selectedText = this.value;
   }
 
