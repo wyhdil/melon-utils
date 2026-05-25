@@ -218,42 +218,95 @@ function renderMelonIdentityTemplate(data: { age: number; authDate: string; mask
   const nameLine = `${escapeHtml(data.maskedName)} (만 ${data.age}세)`;
 
   return `<div class="modal-dialog modal-myinfo">
-\t<div class="modal-layer">
-\t <div class="inner-layer">
-\t  <div class="layer-head">
-\t   <strong class="tit-layer">이름/나이 확인</strong>
-\t  </div>
-\t  <div class="layer-body">
-\t   <div class="inner-body">
-\t\t<strong class="tit-popup">등록된 본인인증 정보를<br>확인해주세요.</strong>
-\t\t<dl class="info-identity">
-\t\t <div class="item-identity">
-\t\t  <dt>이름</dt>
-\t\t  <dd>${nameLine}</dd>
-\t\t </div>
-\t\t <div class="item-identity">
-\t\t  <dt>본인인증일</dt>
-\t\t  <dd>${escapeHtml(data.authDate)}</dd>
-\t\t </div>
-\t\t</dl>
-\t\t<ul class="list-notice">
-\t\t <li>본인인증 정보는 서비스 이용을 위한 나이확인 및 본인확인 용도로 활용됩니다. </li>
-\t\t <li>개명하셨다면, 본인인증을 통해 개명된 이름으로 변경할 수 있으며, 타인의 정보로는 변경할 수 없습니다.<br><a href=" " class="link-txt">개명하셨나요?</a></li>
-\t\t</ul>
-\t\t<div class="wrap-btn">
-\t\t <button type="button" class="btn-modal" onclick="javascript:accountsJs.closeLayerPopup('setting-sub-layer');">
-\t\t  <span class="txt-btn">확인</span>
-\t\t </button>
-\t\t</div>
-\t   </div>
-\t  </div>
-\t  <button type="button" class="btn-modal btn-close" onclick="javascript:accountsJs.closeLayerPopup('setting-sub-layer');">
-\t   <span class="ico-sprite ico-gnb-web-ca-close">닫기</span>
-\t   <span class="ico-sprite ico-popup-layer-close">닫기</span>
-\t  </button>
-\t </div>
-\t</div>
-</div>`;
+  <div class="modal-layer">
+   <div class="inner-layer">
+    <div class="layer-head">
+     <strong class="tit-layer">이름/나이 확인</strong>
+    </div>
+    <div class="layer-body">
+     <div class="inner-body">
+      <strong class="tit-popup">등록된 본인인증 정보를<br>확인해주세요.</strong>
+      <dl class="info-identity">
+       <div class="item-identity">
+        <dt>이름</dt>
+        
+         
+      <dd>${nameLine}</dd>
+         
+         
+        
+ 
+       </div>
+       <div class="item-identity">
+        <dt>본인인증일</dt>
+        
+         
+          <dd>${escapeHtml(data.authDate)}</dd>
+         
+         
+        
+       </div>
+      </dl>
+      <ul class="list-notice">
+       
+        
+         <li>본인인증 정보는 서비스 이용을 위한 나이확인 및 본인확인 용도로 활용됩니다. </li>
+         <li>개명하셨다면, 본인인증을 통해 개명된 이름으로 변경할 수 있으며, 타인의 정보로는 변경할 수 없습니다.<br><a href=" " class="link-txt">개명하셨나요?</a ></li>
+        
+        
+       
+      </ul>
+      <div class="wrap-btn">
+       
+        
+         <button type="button" class="btn-modal" onclick="javascript:accountsJs.closeLayerPopup('setting-sub-layer');">
+          <span class="txt-btn">확인</span>
+         </button>
+        
+        
+       
+      </div>
+     </div>
+    </div>
+    <button type="button" class="btn-modal btn-close" onclick="javascript:accountsJs.closeLayerPopup('setting-sub-layer');">
+     <span class="ico-sprite ico-gnb-web-ca-close">닫기</span>
+     <span class="ico-sprite ico-popup-layer-close">닫기</span>
+    </button>
+   </div>
+  </div>
+ </div>
+ 
+ 
+ 
+ <script type="text/javascript">
+  function popupAgeauth(){
+     // 레이어 팝업 닫기.
+     accountsJs.closeLayerPopup('setting-sub-layer');
+ 
+     
+     var title = "본인확인";
+     // var rnmUrl = httpsMemberDomain + "/ageauth/main_inform.htm?viewType=CHANGENAME&cpId="+POC_ID+"&footer=off&callback=";
+     var rnmUrl = httpsAccountsDomain + "/ageauth/main?viewType=CHANGENAME&cpId="+POC_ID+"&footer=off&callback=";
+     var cbUrl = httpsAccountsDomain+"/ageauth/accounts_cbChangeName?cpId="+POC_ID;
+     var url = "";
+ 
+     if(POC_ID == 'IS40') {
+       
+       cbUrl = httpsAccountsDomain+"/ageauth/accounts_cbChangeNameIS40";
+       url = "meloniphone://webview?close=N&type=CA&title="+encodeURIComponent(title)+"&url="+encodeURIComponent(rnmUrl+cbUrl);
+       location.href = url;
+     }else if(POC_ID == 'AS40'){
+       url = "melonapp://webview?close=N&type=CA&title="+encodeURIComponent(title)+"&url="+encodeURIComponent(rnmUrl+cbUrl);
+       location.href = url;
+     }else if(POC_ID == 'IT40'){
+       url = "melonipad://webview?close=N&type=CA&title="+encodeURIComponent(title)+"&url="+encodeURIComponent(rnmUrl+cbUrl);
+       location.href = url;
+     }else {
+       window.name = "_MYINFO_CHANGE_NAME";
+       window.open(rnmUrl+cbUrl, 'ACCOUNT_COMMON_WIN', 'app_,scrollbars=yes,resizable=yes,location=no,menubar=no,toolbar=no,statusbar=no,status=no,width=600,height=640,left=20,top=20');
+     }
+  }
+ </script>`;
 }
 
 function isValidBirthDate(birthDate: string): boolean {
