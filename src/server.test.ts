@@ -59,7 +59,7 @@ test("serves the feature modules", async () => {
     assert.equal(response.status, 200);
     assert.deepEqual(
       body.modules.map((module) => module.id),
-      ["album_source", "melon_identity", "single_source", "avatar_change"],
+      ["album_source", "melon_identity", "single_source"],
     );
   } finally {
     await new Promise<void>((resolve, reject) => {

@@ -4,12 +4,13 @@ const messages = document.querySelector("#messages");
 const sendButton = document.querySelector("#send-button");
 const moduleList = document.querySelector("#module-list");
 const activeModuleDescription = document.querySelector("#active-module-description");
-const avatarForm = document.querySelector("#avatar-form");
-const avatarFileInput = document.querySelector("#avatar-file-input");
 const identityHistory = document.querySelector("#identity-history");
+const identityHistoryClose = document.querySelector("#identity-history-close");
 const identityHistoryList = document.querySelector("#identity-history-list");
+const identityHistoryToggle = document.querySelector("#identity-history-toggle");
 const singleSourceTools = document.querySelector("#single-source-tools");
 let activeModuleId = "album_source";
+let identityHistoryIsOpen = false;
 let identityHistoryLoaded = false;
 const moduleMetaById = new Map();
 const moduleConversations = new Map();
@@ -88,15 +89,15 @@ form.addEventListener("submit", async (event) => {
 
 input.addEventListener("input", resizeInput);
 
-avatarFileInput?.addEventListener("change", async () => {
-  const file = avatarFileInput.files?.[0];
+identityHistoryToggle?.addEventListener("click", async () => {
+  identityHistoryIsOpen = !identityHistoryIsOpen;
+  syncIdentityHistoryPanel();
+  await loadIdentityHistory({ force: identityHistoryIsOpen });
+});
 
-  if (!file) {
-    return;
-  }
-
-  await uploadAvatar(file);
-  avatarFileInput.value = "";
+identityHistoryClose?.addEventListener("click", () => {
+  identityHistoryIsOpen = false;
+  syncIdentityHistoryPanel();
 });
 
 input.addEventListener("keydown", (event) => {
@@ -266,10 +267,6 @@ function getModuleExample(moduleId) {
 
   if (moduleId === "single_source") {
     return "例如：itzy, 달라달라，199";
-  }
-
-  if (moduleId === "avatar_change") {
-    return "选择图片后会自动上传";
   }
 
   return "输入 Melon 相关任务...";
@@ -533,24 +530,41 @@ function setSending(isSending) {
 }
 
 function syncModuleControls() {
-  const isAvatarModule = activeModuleId === "avatar_change";
   const isIdentityModule = activeModuleId === "melon_identity";
 
-  if (avatarForm) {
-    avatarForm.hidden = !isAvatarModule;
+  if (!isIdentityModule) {
+    identityHistoryIsOpen = false;
   }
 
-  if (identityHistory) {
-    identityHistory.hidden = !isIdentityModule;
+  if (identityHistoryToggle) {
+    identityHistoryToggle.hidden = !isIdentityModule;
+    identityHistoryToggle.classList.toggle("is-active", isIdentityModule && identityHistoryIsOpen);
   }
+
+  syncIdentityHistoryPanel();
 
   if (form) {
-    form.hidden = isAvatarModule;
+    form.hidden = false;
   }
+}
+
+function syncIdentityHistoryPanel() {
+  if (!identityHistory) {
+    return;
+  }
+
+  const shouldShow = activeModuleId === "melon_identity" && identityHistoryIsOpen;
+  identityHistory.hidden = !shouldShow;
+  identityHistory.classList.toggle("is-open", shouldShow);
+  identityHistoryToggle?.classList.toggle("is-active", shouldShow);
 }
 
 async function loadIdentityHistory(options = {}) {
   if (!identityHistoryList || activeModuleId !== "melon_identity") {
+    return;
+  }
+
+  if (!identityHistoryIsOpen && !options.force) {
     return;
   }
 
@@ -640,45 +654,4 @@ async function copyHistoryValue(value, button) {
       button.dataset.copying = "false";
     }, 1200);
   }
-}
-
-async function uploadAvatar(file) {
-  appendMessage("user", `上传头像：${file.name}`, "avatar_change");
-  const pending = appendMessage("assistant", "正在上传头像...", "avatar_change");
-
-  try {
-    const response = await fetch("/api/avatar", {
-      method: "POST",
-      headers: {
-        "content-type": file.type || "application/octet-stream",
-        "x-file-name": encodeURIComponent(file.name),
-      },
-      body: file,
-    });
-    const body = await response.json();
-
-    if (!response.ok) {
-      throw new Error(body.error || "上传失败");
-    }
-
-    pending.text = formatAvatarUploadResult(body);
-    renderActiveConversation();
-  } catch (error) {
-    pending.text = `头像上传失败：${error.message}`;
-    renderActiveConversation();
-  }
-}
-
-function formatAvatarUploadResult(result) {
-  return [
-    "头像已提交到 Melon。",
-    `使用字段名：${result.fieldName || "unknown"}`,
-    "",
-    "```text",
-    result.imageUrl || "",
-    "```",
-    "```text",
-    result.originalImageUrl || "",
-    "```",
-  ].join("\n");
 }

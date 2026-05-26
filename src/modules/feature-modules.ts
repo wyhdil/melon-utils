@@ -1,4 +1,4 @@
-export type FeatureModuleId = "album_source" | "melon_identity" | "single_source" | "avatar_change";
+export type FeatureModuleId = "album_source" | "melon_identity" | "single_source";
 
 export type FeatureModule = {
   id: FeatureModuleId;
@@ -24,12 +24,6 @@ export const featureModules: FeatureModule[] = [
     id: "single_source",
     label: "单曲音源",
     description: "按歌手和歌曲名查询 Melon songId，并生成可匹配的单曲音源规则。",
-    status: "available",
-  },
-  {
-    id: "avatar_change",
-    label: "更换头像",
-    description: "上传图片后，使用本地 Melon 登录态自动更换账号头像。",
     status: "available",
   },
 ];

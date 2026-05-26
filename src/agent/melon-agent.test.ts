@@ -22,16 +22,16 @@ test("generates full source html for a configured TWS album", async () => {
   assert.match(response.output, /너의 모든 가능성이 되어 줄게/);
 });
 
-test("lists the four feature modules", () => {
+test("lists the available feature modules", () => {
   const modules = listMelonAgentModules();
 
   assert.deepEqual(
     modules.map((module) => module.id),
-    ["album_source", "melon_identity", "single_source", "avatar_change"],
+    ["album_source", "melon_identity", "single_source"],
   );
   assert.deepEqual(
     modules.map((module) => module.label),
-    ["专辑音源", "melon实名", "单曲音源", "更换头像"],
+    ["专辑音源", "melon实名", "单曲音源"],
   );
 });
 

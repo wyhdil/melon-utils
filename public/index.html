@@ -21,7 +21,6 @@
           <button class="module-button is-active" type="button" data-module-id="album_source">专辑音源</button>
           <button class="module-button" type="button" data-module-id="melon_identity">melon实名</button>
           <button class="module-button" type="button" data-module-id="single_source">单曲音源</button>
-          <button class="module-button" type="button" data-module-id="avatar_change">更换头像</button>
         </div>
       </nav>
 
@@ -34,19 +33,13 @@
         </article>
       </section>
 
-      <form id="avatar-form" class="avatar-uploader" hidden>
-        <div>
-          <strong>上传头像图片</strong>
-          <p>选择图片后会自动提交到 Melon。Cookie 只从本地服务端读取。</p>
-        </div>
-        <label class="avatar-file-button" for="avatar-file-input">选择图片</label>
-        <input id="avatar-file-input" class="sr-only" type="file" accept="image/*" />
-      </form>
-
       <section id="identity-history" class="identity-history" aria-label="melon实名历史记录" hidden>
         <div class="identity-history-head">
-          <strong>近 3 天记录</strong>
-          <span>点名字或模版复制</span>
+          <div>
+            <strong>近 3 天记录</strong>
+            <span>点名字或模版复制</span>
+          </div>
+          <button id="identity-history-close" class="identity-history-close" type="button">收起</button>
         </div>
         <div id="identity-history-list" class="identity-history-list"></div>
       </section>
@@ -54,6 +47,7 @@
       <section id="single-source-tools" class="tool-cards" aria-label="单曲音源正则工具" hidden></section>
 
       <form id="chat-form" class="composer">
+        <button id="identity-history-toggle" class="history-toggle-button" type="button" hidden>记录</button>
         <label class="sr-only" for="message-input">消息</label>
         <textarea id="message-input" rows="1" placeholder="输入 Melon 相关任务..." autocomplete="off"></textarea>
         <button id="send-button" type="submit">发送</button>

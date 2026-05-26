@@ -279,6 +279,10 @@ test("renders melon identity history and copies name or template", async () => {
   const melonButton = document.moduleList.children.find((child) => child.dataset.moduleId === "melon_identity");
   assert.ok(melonButton);
   await melonButton.dispatch("click");
+  assert.equal(document.identityHistory.hidden, true);
+  assert.equal(document.identityHistoryToggle.hidden, false);
+
+  await document.identityHistoryToggle.dispatch("click");
   await flushPromises();
 
   assert.equal(document.identityHistory.hidden, false);
@@ -292,50 +296,6 @@ test("renders melon identity history and copies name or template", async () => {
 
   await copyButtons[1]?.dispatch("click");
   assert.equal(document.copiedText, '<div class="modal-dialog modal-myinfo">WU ****EI</div>');
-});
-
-test("encodes avatar filenames before placing them in request headers", async () => {
-  const script = await readFile("public/app.js", "utf8");
-  const document = createFakeDocument();
-  let avatarHeaders: Record<string, string> | undefined;
-  const context = createContext({
-    document,
-    navigator: {},
-    fetch: async (url: string, init?: { headers?: Record<string, string> }) => {
-      if (url === "/api/modules") {
-        return {
-          ok: true,
-          async json() {
-            return { modules: [{ id: "avatar_change", label: "更换头像", description: "更换头像" }] };
-          },
-        };
-      }
-
-      avatarHeaders = init?.headers;
-      return {
-        ok: true,
-        async json() {
-          return {
-            fieldName: "file",
-            imageUrl: "https://cdn.example/avatar.jpg",
-            originalImageUrl: "https://cdn.example/avatar_org.jpg",
-          };
-        },
-      };
-    },
-    window: {
-      setTimeout(callback: () => void) {
-        callback();
-        return 1;
-      },
-    },
-  });
-
-  new Script(script).runInContext(context);
-  await flushPromises();
-  await new Script("uploadAvatar({ name: '包.png', type: 'image/png' });").runInContext(context);
-
-  assert.equal(avatarHeaders?.["x-file-name"], "%E5%8C%85.png");
 });
 
 type FakeEventHandler = (event?: unknown) => void | Promise<void>;
@@ -454,12 +414,12 @@ class FakeDocument {
   readonly form = new FakeElement("form", this);
   readonly input = new FakeElement("textarea", this);
   readonly activeModuleDescription = new FakeElement("p", this);
-  readonly avatarForm = new FakeElement("form", this);
-  readonly avatarFileInput = new FakeElement("input", this);
   readonly messages = new FakeElement("section", this);
   readonly moduleList = new FakeElement("div", this);
   readonly identityHistory = new FakeElement("section", this);
+  readonly identityHistoryClose = new FakeElement("button", this);
   readonly identityHistoryList = new FakeElement("div", this);
+  readonly identityHistoryToggle = new FakeElement("button", this);
   readonly singleSourceTools = new FakeElement("section", this);
   readonly sendButton = new FakeElement("button", this);
   readonly body = new FakeElement("body", this);
@@ -505,14 +465,6 @@ class FakeDocument {
       return this.sendButton;
     }
 
-    if (selector === "#avatar-form") {
-      return this.avatarForm;
-    }
-
-    if (selector === "#avatar-file-input") {
-      return this.avatarFileInput;
-    }
-
     if (selector === "#single-source-tools") {
       return this.singleSourceTools;
     }
@@ -523,6 +475,14 @@ class FakeDocument {
 
     if (selector === "#identity-history-list") {
       return this.identityHistoryList;
+    }
+
+    if (selector === "#identity-history-close") {
+      return this.identityHistoryClose;
+    }
+
+    if (selector === "#identity-history-toggle") {
+      return this.identityHistoryToggle;
     }
 
     return null;
