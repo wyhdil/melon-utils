@@ -163,6 +163,15 @@ test("keeps module conversations separate when switching tabs", async () => {
         };
       }
 
+      if (url === "/api/identity-history") {
+        return {
+          ok: true,
+          async json() {
+            return { records: [] };
+          },
+        };
+      }
+
       requests.push(JSON.parse(init?.body ?? "{}"));
       return {
         ok: true,
@@ -203,6 +212,86 @@ test("keeps module conversations separate when switching tabs", async () => {
 
   assert.match(document.messagesText(), /melon实名结果/);
   assert.equal(document.activeModuleDescription.textContent, "melon实名说明");
+});
+
+test("renders melon identity history and copies name or template", async () => {
+  const script = await readFile("public/app.js", "utf8");
+  const document = createFakeDocument();
+  const context = createContext({
+    document,
+    navigator: {},
+    fetch: async (url: string, init?: { body?: string }) => {
+      if (url === "/api/modules") {
+        return {
+          ok: true,
+          async json() {
+            return {
+              modules: [
+                {
+                  id: "album_source",
+                  label: "专辑音源",
+                  description: "专辑音源说明",
+                  prompt: "当前模块：专辑音源。",
+                },
+                {
+                  id: "melon_identity",
+                  label: "melon实名",
+                  description: "melon实名说明",
+                  prompt: "当前模块：melon实名。",
+                },
+              ],
+            };
+          },
+        };
+      }
+
+      if (url === "/api/identity-history") {
+        return {
+          ok: true,
+          async json() {
+            return {
+              records: [
+                {
+                  id: "record-1",
+                  name: "WU YANFEI",
+                  template: '<div class="modal-dialog modal-myinfo">WU ****EI</div>',
+                  createdAt: "2026-05-27T00:00:00.000Z",
+                },
+              ],
+            };
+          },
+        };
+      }
+
+      assert.fail(`unexpected fetch: ${url} ${init?.body ?? ""}`);
+    },
+    window: {
+      setTimeout(callback: () => void) {
+        callback();
+        return 1;
+      },
+    },
+  });
+
+  new Script(script).runInContext(context);
+  await flushPromises();
+
+  const melonButton = document.moduleList.children.find((child) => child.dataset.moduleId === "melon_identity");
+  assert.ok(melonButton);
+  await melonButton.dispatch("click");
+  await flushPromises();
+
+  assert.equal(document.identityHistory.hidden, false);
+  assert.match(document.identityHistoryList.fullText(), /WU YANFEI/);
+
+  const copyButtons = document.identityHistoryList.findAllByClassName("history-copy-button");
+  assert.equal(copyButtons.length, 2);
+
+  await copyButtons[0]?.dispatch("click");
+  assert.equal(document.copiedText, "WU YANFEI");
+
+  await copyButtons[1]?.dispatch("click");
+  assert.equal(document.copiedText, '<div class="modal-dialog modal-myinfo">WU ****EI</div>');
 });
 
 test("encodes avatar filenames before placing them in request headers", async () => {
@@ -369,6 +458,8 @@ class FakeDocument {
   readonly avatarFileInput = new FakeElement("input", this);
   readonly messages = new FakeElement("section", this);
   readonly moduleList = new FakeElement("div", this);
+  readonly identityHistory = new FakeElement("section", this);
+  readonly identityHistoryList = new FakeElement("div", this);
   readonly singleSourceTools = new FakeElement("section", this);
   readonly sendButton = new FakeElement("button", this);
   readonly body = new FakeElement("body", this);
@@ -424,6 +515,14 @@ class FakeDocument {
 
     if (selector === "#single-source-tools") {
       return this.singleSourceTools;
+    }
+
+    if (selector === "#identity-history") {
+      return this.identityHistory;
+    }
+
+    if (selector === "#identity-history-list") {
+      return this.identityHistoryList;
     }
 
     return null;

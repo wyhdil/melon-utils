@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { AddressInfo } from "node:net";
+import type { IdentityHistoryRecord, IdentityHistoryStore } from "./tools/identity-history-store.js";
 import { createWebServer } from "./server.js";
 
 test("serves the chat page", async () => {
@@ -82,6 +83,57 @@ test("posts chat messages with an explicit module", async () => {
 
     assert.equal(response.status, 200);
     assert.match(body.output, /歌手名和歌曲名/);
+  } finally {
+    await new Promise<void>((resolve, reject) => {
+      server.close((error?: Error) => (error ? reject(error) : resolve()));
+    });
+  }
+});
+
+test("stores melon identity history after successful generation", async () => {
+  const identityHistoryStore = createFakeIdentityHistoryStore();
+  const server = createWebServer({ identityHistoryStore });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+
+  try {
+    const baseUrl = getBaseUrl(server.address() as AddressInfo);
+    const response = await fetch(`${baseUrl}/api/chat`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ moduleId: "melon_identity", message: "WU YANFEI,19870918" }),
+    });
+
+    assert.equal(response.status, 200);
+    assert.equal(identityHistoryStore.records.length, 1);
+    assert.equal(identityHistoryStore.records[0]?.name, "WU YANFEI");
+    assert.match(identityHistoryStore.records[0]?.template ?? "", /modal-dialog modal-myinfo/);
+    assert.match(identityHistoryStore.records[0]?.template ?? "", /WU \*\*\*\*EI/);
+  } finally {
+    await new Promise<void>((resolve, reject) => {
+      server.close((error?: Error) => (error ? reject(error) : resolve()));
+    });
+  }
+});
+
+test("serves recent melon identity history", async () => {
+  const identityHistoryStore = createFakeIdentityHistoryStore([
+    {
+      id: "record-1",
+      name: "WU YANFEI",
+      template: "<div>template</div>",
+      createdAt: "2026-05-27T00:00:00.000Z",
+    },
+  ]);
+  const server = createWebServer({ identityHistoryStore });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+
+  try {
+    const baseUrl = getBaseUrl(server.address() as AddressInfo);
+    const response = await fetch(`${baseUrl}/api/identity-history`);
+    const body = (await response.json()) as { records: IdentityHistoryRecord[] };
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(body.records, identityHistoryStore.records);
   } finally {
     await new Promise<void>((resolve, reject) => {
       server.close((error?: Error) => (error ? reject(error) : resolve()));
@@ -227,4 +279,26 @@ test("rejects avatar uploads without an image content type", async () => {
 
 function getBaseUrl(address: AddressInfo): string {
   return `http://127.0.0.1:${address.port}`;
+}
+
+function createFakeIdentityHistoryStore(initialRecords: IdentityHistoryRecord[] = []): IdentityHistoryStore & {
+  records: IdentityHistoryRecord[];
+} {
+  return {
+    records: [...initialRecords],
+    async add(record) {
+      const savedRecord = {
+        id: `record-${this.records.length + 1}`,
+        name: record.name,
+        template: record.template,
+        createdAt: record.createdAt?.toISOString() ?? "2026-05-27T00:00:00.000Z",
+      };
+      this.records.unshift(savedRecord);
+      return savedRecord;
+    },
+    async listRecent() {
+      return this.records;
+    },
+    async pruneExpired() {},
+  };
 }

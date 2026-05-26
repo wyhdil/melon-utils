@@ -6,8 +6,11 @@ const moduleList = document.querySelector("#module-list");
 const activeModuleDescription = document.querySelector("#active-module-description");
 const avatarForm = document.querySelector("#avatar-form");
 const avatarFileInput = document.querySelector("#avatar-file-input");
+const identityHistory = document.querySelector("#identity-history");
+const identityHistoryList = document.querySelector("#identity-history-list");
 const singleSourceTools = document.querySelector("#single-source-tools");
 let activeModuleId = "album_source";
+let identityHistoryLoaded = false;
 const moduleMetaById = new Map();
 const moduleConversations = new Map();
 const singleSourceRegexTools = [
@@ -71,6 +74,9 @@ form.addEventListener("submit", async (event) => {
 
     pending.text = body.output;
     renderActiveConversation();
+    if (requestModuleId === "melon_identity") {
+      await loadIdentityHistory({ force: true });
+    }
   } catch (error) {
     pending.text = `请求失败：${error.message}`;
     renderActiveConversation();
@@ -184,6 +190,7 @@ function setActiveModule(moduleId) {
 
   syncModuleControls();
   syncInputPlaceholder();
+  loadIdentityHistory();
   renderSingleSourceTools();
   renderActiveConversation();
 }
@@ -527,13 +534,111 @@ function setSending(isSending) {
 
 function syncModuleControls() {
   const isAvatarModule = activeModuleId === "avatar_change";
+  const isIdentityModule = activeModuleId === "melon_identity";
 
   if (avatarForm) {
     avatarForm.hidden = !isAvatarModule;
   }
 
+  if (identityHistory) {
+    identityHistory.hidden = !isIdentityModule;
+  }
+
   if (form) {
     form.hidden = isAvatarModule;
+  }
+}
+
+async function loadIdentityHistory(options = {}) {
+  if (!identityHistoryList || activeModuleId !== "melon_identity") {
+    return;
+  }
+
+  if (identityHistoryLoaded && !options.force) {
+    return;
+  }
+
+  identityHistoryLoaded = true;
+  identityHistoryList.replaceChildren(createIdentityHistoryStatus("加载中..."));
+
+  try {
+    const response = await fetch("/api/identity-history");
+
+    if (!response.ok) {
+      throw new Error("历史记录加载失败");
+    }
+
+    const body = await response.json();
+    renderIdentityHistory(body.records || []);
+  } catch {
+    identityHistoryList.replaceChildren(createIdentityHistoryStatus("历史记录暂时不可用"));
+  }
+}
+
+function renderIdentityHistory(records) {
+  if (!identityHistoryList) {
+    return;
+  }
+
+  if (records.length === 0) {
+    identityHistoryList.replaceChildren(createIdentityHistoryStatus("暂无记录"));
+    return;
+  }
+
+  identityHistoryList.replaceChildren(...records.map(createIdentityHistoryItem));
+}
+
+function createIdentityHistoryStatus(text) {
+  const status = document.createElement("p");
+  status.className = "identity-history-empty";
+  status.textContent = text;
+  return status;
+}
+
+function createIdentityHistoryItem(record) {
+  const item = document.createElement("article");
+  item.className = "identity-history-item";
+
+  const nameButton = document.createElement("button");
+  nameButton.className = "history-copy-button identity-history-name";
+  nameButton.type = "button";
+  nameButton.textContent = record.name || "未命名";
+  nameButton.addEventListener("click", async () => {
+    await copyHistoryValue(record.name || "", nameButton);
+  });
+
+  const templateButton = document.createElement("button");
+  templateButton.className = "history-copy-button identity-history-template";
+  templateButton.type = "button";
+  templateButton.textContent = "模版";
+  templateButton.addEventListener("click", async () => {
+    await copyHistoryValue(record.template || "", templateButton);
+  });
+
+  item.append(nameButton, templateButton);
+  return item;
+}
+
+async function copyHistoryValue(value, button) {
+  if (button.dataset.copying === "true") {
+    return;
+  }
+
+  button.dataset.copying = "true";
+  const originalLabel = button.textContent || "";
+
+  try {
+    await copyText(value);
+    button.classList.toggle("is-copied", true);
+    button.textContent = "已复制";
+  } catch {
+    button.textContent = "复制失败";
+  } finally {
+    window.setTimeout(() => {
+      button.classList.toggle("is-copied", false);
+      button.textContent = originalLabel;
+      button.dataset.copying = "false";
+    }, 1200);
   }
 }
 

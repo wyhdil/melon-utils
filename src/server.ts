@@ -7,6 +7,11 @@ import { pathToFileURL } from "node:url";
 import { listMelonAgentModules, runMelonAgent } from "./agent/melon-agent.js";
 import { loadLocalEnv } from "./tools/env.js";
 import { uploadMelonAvatar, type AvatarUploadFile, type AvatarUploadResult } from "./tools/melon-avatar-client.js";
+import {
+  createFileIdentityHistoryStore,
+  type IdentityHistoryDraft,
+  type IdentityHistoryStore,
+} from "./tools/identity-history-store.js";
 
 const publicDir = resolve(process.cwd(), "public");
 const defaultHost = "127.0.0.1";
@@ -15,16 +20,18 @@ const maxAvatarBytes = 5 * 1024 * 1024;
 
 type WebServerOptions = {
   copyText?: (text: string) => Promise<void>;
+  identityHistoryStore?: IdentityHistoryStore;
   uploadAvatar?: (file: AvatarUploadFile) => Promise<AvatarUploadResult>;
 };
 
 export function createWebServer(options: WebServerOptions = {}): Server {
   const copyText = options.copyText ?? copyTextToSystemClipboard;
+  const identityHistoryStore = options.identityHistoryStore ?? createFileIdentityHistoryStore();
   const uploadAvatar = options.uploadAvatar ?? uploadMelonAvatar;
 
   return createServer(async (request, response) => {
     try {
-      await handleRequest(request, response, { copyText, uploadAvatar });
+      await handleRequest(request, response, { copyText, identityHistoryStore, uploadAvatar });
     } catch (error) {
       console.error(error);
       sendJson(response, 500, { error: "Internal server error" });
@@ -37,18 +44,24 @@ async function handleRequest(
   response: ServerResponse,
   handlers: {
     copyText: (text: string) => Promise<void>;
+    identityHistoryStore: IdentityHistoryStore;
     uploadAvatar: (file: AvatarUploadFile) => Promise<AvatarUploadResult>;
   },
 ): Promise<void> {
   const url = new URL(request.url ?? "/", "http://localhost");
 
   if (request.method === "POST" && url.pathname === "/api/chat") {
-    await handleChat(request, response);
+    await handleChat(request, response, handlers.identityHistoryStore);
     return;
   }
 
   if (request.method === "GET" && url.pathname === "/api/modules") {
     sendJson(response, 200, { modules: listMelonAgentModules() });
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/identity-history") {
+    sendJson(response, 200, { records: await handlers.identityHistoryStore.listRecent() });
     return;
   }
 
@@ -102,7 +115,11 @@ async function handleAvatarUpload(
   }
 }
 
-async function handleChat(request: IncomingMessage, response: ServerResponse): Promise<void> {
+async function handleChat(
+  request: IncomingMessage,
+  response: ServerResponse,
+  identityHistoryStore: IdentityHistoryStore,
+): Promise<void> {
   const body = await readJsonBody(request);
 
   if (!isChatRequest(body)) {
@@ -111,6 +128,15 @@ async function handleChat(request: IncomingMessage, response: ServerResponse): P
   }
 
   const result = await runMelonAgent(body.message, { moduleId: body.moduleId });
+
+  if (body.moduleId === "melon_identity") {
+    const historyDraft = extractIdentityHistoryDraft(result.output);
+
+    if (historyDraft) {
+      await identityHistoryStore.add(historyDraft);
+    }
+  }
+
   sendJson(response, 200, result);
 }
 
@@ -222,6 +248,21 @@ function isCopyRequest(value: unknown): value is { text: string } {
     "text" in value &&
     typeof value.text === "string"
   );
+}
+
+function extractIdentityHistoryDraft(output: string): IdentityHistoryDraft | null {
+  const codeBlocks = Array.from(output.matchAll(/```(?<language>[a-zA-Z0-9_-]*)\n(?<content>[\s\S]*?)```/g), (match) => ({
+    language: match.groups?.language ?? "",
+    content: match.groups?.content.trim() ?? "",
+  }));
+  const name = codeBlocks[1]?.content;
+  const template = codeBlocks.find((block) => block.language === "html")?.content;
+
+  if (!name || !template) {
+    return null;
+  }
+
+  return { name, template };
 }
 
 function getUploadFilename(request: IncomingMessage, contentType: string): string {
