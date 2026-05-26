@@ -46,6 +46,14 @@ test("outputs multiline slash-date identity input with original name as a copy b
   assert.match(codeBlocks[3]?.content ?? "", /<dd>TO\*\*\*\*\*\*\* YU \(만 20세\)<\/dd>/);
 });
 
+test("masks explicit spaced identity names by preserving only the first and last two letters", async () => {
+  const task = createMelonIdentityTask(new Date(2026, 4, 26), () => 0);
+  const result = await task.run("NIEH YU HSUAN, 19991201, 指定认证日2026.03.23");
+
+  assert.equal(result.status, "ok");
+  assert.match(result.output, /<dd>NI\*\* \*\* \*\*\*AN \(만 26세\)<\/dd>/);
+});
+
 test("parses common birth date formats from identity input", () => {
   assert.deepEqual(parseIdentityInput("SHI YUNLIN, 1991.08.14"), {
     authDate: undefined,

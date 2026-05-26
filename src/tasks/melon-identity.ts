@@ -174,25 +174,23 @@ function maskGivenName(givenName: string): string {
   return `${"*".repeat(givenName.length - 2)}${givenName.slice(-2)}`;
 }
 
-function maskExplicitGivenNamePart(namePart: string): string {
-  if (namePart.length <= 2) {
-    return namePart;
-  }
-
-  return "*".repeat(namePart.length);
-}
-
 function maskExplicitNameParts(parts: string[]): string {
-  const [surname, ...nameParts] = parts;
+  const totalLetters = parts.reduce((sum, part) => sum + part.length, 0);
+  let letterIndex = 0;
 
-  // User-provided spaces are authoritative: surname, optional middle parts,
-  // then final given-name part. Only the final part keeps its last two letters.
-  return [
-    maskSurname(surname),
-    ...nameParts.map((part, index) =>
-      index === nameParts.length - 1 ? maskGivenName(part) : maskExplicitGivenNamePart(part),
-    ),
-  ].join(" ");
+  // User-provided spaces are authoritative, but masking is based on the full
+  // name: only the first two and final two letters remain visible.
+  return parts
+    .map((part) =>
+      [...part]
+        .map((letter) => {
+          const shouldShow = letterIndex < 2 || letterIndex >= totalLetters - 2;
+          letterIndex += 1;
+          return shouldShow ? letter : "*";
+        })
+        .join(""),
+    )
+    .join(" ");
 }
 
 export function calculateFullAge(birthDate: string, now: Date = new Date()): number {
