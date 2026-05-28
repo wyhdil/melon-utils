@@ -353,9 +353,12 @@ code {
   bottom: calc(76px + env(safe-area-inset-bottom));
   left: 14px;
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 6px;
   min-width: 0;
-  max-height: min(46vh, 420px);
+  height: min(46vh, 420px);
+  max-height: calc(100dvh - 190px);
+  overflow: hidden;
   padding: 12px;
   border: 1px solid #dfe6f0;
   border-radius: 22px;
@@ -413,8 +416,11 @@ code {
 .identity-history-list {
   display: grid;
   gap: 6px;
+  min-height: 0;
   min-width: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -736,9 +742,10 @@ textarea:focus {
 
   .identity-history {
     right: 9px;
-    bottom: calc(72px + env(safe-area-inset-bottom));
+    bottom: calc(86px + env(safe-area-inset-bottom));
     left: 9px;
-    max-height: min(48vh, 390px);
+    height: min(50vh, 390px);
+    max-height: calc(100dvh - 176px);
     padding: 10px;
     border-radius: 20px;
   }

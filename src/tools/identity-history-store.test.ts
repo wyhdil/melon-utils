@@ -9,19 +9,21 @@ test("file identity history store keeps only records from the last three days", 
   const directory = await mkdtemp(join(tmpdir(), "melon-identity-history-"));
   const filePath = join(directory, "identity-history.json");
   const store = createFileIdentityHistoryStore(filePath);
+  const now = new Date();
+  const daysAgo = (days: number) => new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
 
   await store.add({
     name: "OLD NAME",
     template: "<div>old</div>",
-    createdAt: new Date("2026-05-23T23:59:59.000Z"),
+    createdAt: daysAgo(4),
   });
   await store.add({
     name: "WU YANFEI",
     template: "<div>new</div>",
-    createdAt: new Date("2026-05-25T00:00:00.000Z"),
+    createdAt: daysAgo(1),
   });
 
-  const records = await store.listRecent(new Date("2026-05-27T00:00:00.000Z"));
+  const records = await store.listRecent(now);
 
   assert.deepEqual(
     records.map((record) => record.name),
