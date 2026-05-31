@@ -257,6 +257,12 @@ test("renders melon identity history and copies name or template", async () => {
                   template: '<div class="modal-dialog modal-myinfo">WU ****EI</div>',
                   createdAt: "2026-05-27T00:00:00.000Z",
                 },
+                {
+                  id: "record-2",
+                  name: "LI YUDIE",
+                  template: '<div class="modal-dialog modal-myinfo">LI **IE</div>',
+                  createdAt: "2026-05-27T00:00:00.000Z",
+                },
               ],
             };
           },
@@ -287,6 +293,12 @@ test("renders melon identity history and copies name or template", async () => {
 
   assert.equal(document.identityHistory.hidden, false);
   assert.match(document.identityHistoryList.fullText(), /WU YANFEI/);
+  assert.match(document.identityHistoryList.fullText(), /LI YUDIE/);
+
+  document.identityHistorySearch.value = "wu";
+  await document.identityHistorySearch.dispatch("input");
+  assert.match(document.identityHistoryList.fullText(), /WU YANFEI/);
+  assert.doesNotMatch(document.identityHistoryList.fullText(), /LI YUDIE/);
 
   const copyButtons = document.identityHistoryList.findAllByClassName("history-copy-button");
   assert.equal(copyButtons.length, 2);
@@ -419,6 +431,7 @@ class FakeDocument {
   readonly identityHistory = new FakeElement("section", this);
   readonly identityHistoryClose = new FakeElement("button", this);
   readonly identityHistoryList = new FakeElement("div", this);
+  readonly identityHistorySearch = new FakeElement("input", this);
   readonly identityHistoryToggle = new FakeElement("button", this);
   readonly singleSourceTools = new FakeElement("section", this);
   readonly sendButton = new FakeElement("button", this);
@@ -475,6 +488,10 @@ class FakeDocument {
 
     if (selector === "#identity-history-list") {
       return this.identityHistoryList;
+    }
+
+    if (selector === "#identity-history-search") {
+      return this.identityHistorySearch;
     }
 
     if (selector === "#identity-history-close") {

@@ -353,7 +353,7 @@ code {
   bottom: calc(76px + env(safe-area-inset-bottom));
   left: 14px;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(0, 1fr);
   gap: 6px;
   min-width: 0;
   height: min(46vh, 420px);
@@ -413,6 +413,27 @@ code {
   font-weight: 800;
 }
 
+.identity-history-search {
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  border: 1px solid #dfe5ee;
+  border-radius: 999px;
+  padding: 7px 12px;
+  outline: none;
+  background: rgb(255 255 255 / 94%);
+  color: var(--text);
+  font-size: 13px;
+  box-shadow: 0 5px 14px rgb(17 24 39 / 4%);
+}
+
+.identity-history-search:focus {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 4px rgb(0 122 255 / 13%),
+    0 5px 14px rgb(17 24 39 / 4%);
+}
+
 .identity-history-list {
   display: grid;
   gap: 6px;
@@ -435,6 +456,22 @@ code {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 6px;
   min-width: 0;
+  border-radius: 999px;
+  transition:
+    background 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.identity-history-item:hover,
+.identity-history-item:focus-within {
+  background: rgb(0 122 255 / 8%);
+  box-shadow: 0 0 0 4px rgb(0 122 255 / 8%);
+}
+
+.identity-history-item:hover .history-copy-button,
+.identity-history-item:focus-within .history-copy-button {
+  border-color: rgb(0 122 255 / 32%);
+  background: #ffffff;
 }
 
 .history-copy-button {
@@ -758,6 +795,12 @@ textarea:focus {
     min-height: 30px;
     padding: 6px 9px;
     font-size: 11px;
+  }
+
+  .identity-history-search {
+    min-height: 32px;
+    padding: 7px 11px;
+    font-size: 12px;
   }
 
   .history-toggle-button {

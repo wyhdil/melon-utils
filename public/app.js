@@ -7,11 +7,13 @@ const activeModuleDescription = document.querySelector("#active-module-descripti
 const identityHistory = document.querySelector("#identity-history");
 const identityHistoryClose = document.querySelector("#identity-history-close");
 const identityHistoryList = document.querySelector("#identity-history-list");
+const identityHistorySearch = document.querySelector("#identity-history-search");
 const identityHistoryToggle = document.querySelector("#identity-history-toggle");
 const singleSourceTools = document.querySelector("#single-source-tools");
 let activeModuleId = "album_source";
 let identityHistoryIsOpen = false;
 let identityHistoryLoaded = false;
+let identityHistoryRecords = [];
 const moduleMetaById = new Map();
 const moduleConversations = new Map();
 const singleSourceRegexTools = [
@@ -98,6 +100,10 @@ identityHistoryToggle?.addEventListener("click", async () => {
 identityHistoryClose?.addEventListener("click", () => {
   identityHistoryIsOpen = false;
   syncIdentityHistoryPanel();
+});
+
+identityHistorySearch?.addEventListener("input", () => {
+  renderIdentityHistory(identityHistoryRecords);
 });
 
 input.addEventListener("keydown", (event) => {
@@ -583,7 +589,8 @@ async function loadIdentityHistory(options = {}) {
     }
 
     const body = await response.json();
-    renderIdentityHistory(body.records || []);
+    identityHistoryRecords = body.records || [];
+    renderIdentityHistory(identityHistoryRecords);
   } catch {
     identityHistoryList.replaceChildren(createIdentityHistoryStatus("历史记录暂时不可用"));
   }
@@ -594,12 +601,26 @@ function renderIdentityHistory(records) {
     return;
   }
 
+  const query = normalizeIdentityHistoryQuery(identityHistorySearch?.value || "");
+  const visibleRecords = query
+    ? records.filter((record) => normalizeIdentityHistoryQuery(record.name || "").includes(query))
+    : records;
+
   if (records.length === 0) {
     identityHistoryList.replaceChildren(createIdentityHistoryStatus("暂无记录"));
     return;
   }
 
-  identityHistoryList.replaceChildren(...records.map(createIdentityHistoryItem));
+  if (visibleRecords.length === 0) {
+    identityHistoryList.replaceChildren(createIdentityHistoryStatus("没有匹配记录"));
+    return;
+  }
+
+  identityHistoryList.replaceChildren(...visibleRecords.map(createIdentityHistoryItem));
+}
+
+function normalizeIdentityHistoryQuery(value) {
+  return value.trim().toLocaleLowerCase().replace(/\s+/g, " ");
 }
 
 function createIdentityHistoryStatus(text) {
