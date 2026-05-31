@@ -296,7 +296,7 @@ code {
 
 .composer {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px;
   min-width: 0;
   padding: 11px 14px calc(11px + env(safe-area-inset-bottom));
@@ -304,6 +304,10 @@ code {
   background: rgb(248 250 252 / 92%);
   backdrop-filter: blur(20px) saturate(180%);
   box-shadow: var(--shadow);
+}
+
+.composer.has-history {
+  grid-template-columns: auto minmax(0, 1fr) auto;
 }
 
 .avatar-uploader {
@@ -453,7 +457,7 @@ code {
 
 .identity-history-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(92px, 16%);
   gap: 6px;
   min-width: 0;
   border-radius: 999px;
@@ -475,6 +479,8 @@ code {
 }
 
 .history-copy-button {
+  display: flex;
+  align-items: center;
   min-width: 0;
   min-height: 32px;
   border: 1px solid #dfe5ee;
@@ -489,6 +495,7 @@ code {
 }
 
 .identity-history-name {
+  justify-content: flex-start;
   overflow: hidden;
   text-align: left;
   text-overflow: ellipsis;
@@ -496,7 +503,7 @@ code {
 }
 
 .identity-history-template {
-  flex: 0 0 auto;
+  justify-content: center;
   color: var(--accent);
 }
 
@@ -763,9 +770,13 @@ textarea:focus {
   }
 
   .composer {
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 8px;
     padding: 9px 10px calc(9px + env(safe-area-inset-bottom));
+  }
+
+  .composer.has-history {
+    grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
   .avatar-uploader {
@@ -795,6 +806,10 @@ textarea:focus {
     min-height: 30px;
     padding: 6px 9px;
     font-size: 11px;
+  }
+
+  .identity-history-item {
+    grid-template-columns: minmax(0, 1fr) minmax(76px, 24%);
   }
 
   .identity-history-search {

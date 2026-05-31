@@ -194,6 +194,7 @@ test("keeps module conversations separate when switching tabs", async () => {
   const melonButton = document.moduleList.children.find((child) => child.dataset.moduleId === "melon_identity");
   assert.ok(melonButton);
   await melonButton.dispatch("click");
+  assert.match(document.form.className, /has-history/);
 
   document.input.value = "test kk,20001010";
   await document.form.dispatch("submit", { preventDefault() {} });
@@ -205,6 +206,7 @@ test("keeps module conversations separate when switching tabs", async () => {
   assert.ok(albumButton);
   await albumButton.dispatch("click");
 
+  assert.doesNotMatch(document.form.className, /has-history/);
   assert.match(document.messagesText(), /当前模块：专辑音源/);
   assert.doesNotMatch(document.messagesText(), /melon实名结果/);
 

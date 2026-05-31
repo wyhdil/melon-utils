@@ -547,6 +547,7 @@ function syncModuleControls() {
     identityHistoryToggle.classList.toggle("is-active", isIdentityModule && identityHistoryIsOpen);
   }
 
+  form?.classList.toggle("has-history", isIdentityModule);
   syncIdentityHistoryPanel();
 
   if (form) {
