@@ -255,7 +255,8 @@ function extractIdentityHistoryDraft(output: string): IdentityHistoryDraft | nul
     language: match.groups?.language ?? "",
     content: match.groups?.content.trim() ?? "",
   }));
-  const name = codeBlocks[1]?.content;
+  const regexIndex = codeBlocks.findIndex((block) => block.language === "regex");
+  const name = regexIndex > 0 ? codeBlocks[regexIndex - 1]?.content : codeBlocks[1]?.content;
   const template = codeBlocks.find((block) => block.language === "html")?.content;
 
   if (!name || !template) {

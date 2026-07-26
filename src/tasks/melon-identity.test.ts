@@ -20,15 +20,16 @@ test("outputs identity helper fragments and original name before the html templa
     content: match.groups?.content.trim(),
   }));
 
-  assert.equal(codeBlocks.length, 4);
-  assert.deepEqual(codeBlocks.map((block) => block.language), ["text", "text", "regex", "html"]);
-  assert.equal(codeBlocks[0]?.content, "melon-kkt-");
-  assert.equal(codeBlocks[1]?.content, "test kk");
-  assert.equal(codeBlocks[2]?.content, "[\\s\\S]*");
-  assert.match(codeBlocks[3]?.content ?? "", /<dd>TE\*\* KK \(만 25세\)<\/dd>/);
-  assert.match(codeBlocks[3]?.content ?? "", /<dd>2026\.02\.02<\/dd>/);
-  assert.match(codeBlocks[3]?.content ?? "", /function popupAgeauth\(\)/);
-  assert.match(codeBlocks[3]?.content ?? "", /accounts_cbChangeNameIS40/);
+  assert.equal(codeBlocks.length, 5);
+  assert.deepEqual(codeBlocks.map((block) => block.language), ["text", "text", "text", "regex", "html"]);
+  assert.equal(codeBlocks[0]?.content, "melon-");
+  assert.equal(codeBlocks[1]?.content, "melon-test kk");
+  assert.equal(codeBlocks[2]?.content, "test kk");
+  assert.equal(codeBlocks[3]?.content, "[\\s\\S]*");
+  assert.match(codeBlocks[4]?.content ?? "", /<dd>TE\*\* KK \(만 25세\)<\/dd>/);
+  assert.match(codeBlocks[4]?.content ?? "", /<dd>2026\.02\.02<\/dd>/);
+  assert.match(codeBlocks[4]?.content ?? "", /function popupAgeauth\(\)/);
+  assert.match(codeBlocks[4]?.content ?? "", /accounts_cbChangeNameIS40/);
 });
 
 test("outputs multiline slash-date identity input with original name as a copy block", async () => {
@@ -42,8 +43,9 @@ test("outputs multiline slash-date identity input with original name as a copy b
     content: match.groups?.content.trim(),
   }));
 
-  assert.equal(codeBlocks[1]?.content, "TOYOSHIMA YU");
-  assert.match(codeBlocks[3]?.content ?? "", /<dd>TO\*\*\*\*\*\*\* YU \(만 20세\)<\/dd>/);
+  assert.equal(codeBlocks[1]?.content, "melon-TOYOSHIMA YU");
+  assert.equal(codeBlocks[2]?.content, "TOYOSHIMA YU");
+  assert.match(codeBlocks[4]?.content ?? "", /<dd>TO\*\*\*\*\*\*\* YU \(만 20세\)<\/dd>/);
 });
 
 test("masks explicit spaced identity names by preserving only the first and last two letters", async () => {
