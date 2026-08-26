@@ -1,6 +1,7 @@
 import { createLatestAlbumSourcesTask } from "../tasks/latest-album-sources.js";
 import { createFullSourceHtmlTask } from "../tasks/full-source-html.js";
 import { createHelpTask } from "../tasks/help.js";
+import { createDownloadListTask } from "../tasks/download-list.js";
 import { createMelonIdentityTask } from "../tasks/melon-identity.js";
 import { createModulePlaceholderTask } from "../tasks/module-placeholder.js";
 import { createSingleSourceTask } from "../tasks/single-source.js";
@@ -35,6 +36,7 @@ export async function runMelonAgent(input: string, options: MelonAgentRunOptions
   registry.register(createLatestAlbumSourcesTask());
   registry.register(createMelonIdentityTask());
   registry.register(createSingleSourceTask());
+  registry.register(createDownloadListTask());
   for (const module of listFeatureModules().filter((candidate) => candidate.status === "planned")) {
     registry.register(createModulePlaceholderTask(module));
   }
@@ -63,6 +65,10 @@ function classifyTask(input: string, module: FeatureModule): string {
 
   if (module.id === "single_source") {
     return "single_source";
+  }
+
+  if (module.id === "download_list") {
+    return "download_list";
   }
 
   if (fullSourceHtmlKeywords.every((keyword) => input.includes(keyword))) {

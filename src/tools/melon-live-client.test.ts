@@ -5,6 +5,7 @@ import {
   parseArtistAlbumsPage,
   parseArtistSearchPage,
   parseSuggestedSearchKeyword,
+  parseSongDetailPage,
   parseSongSearchPage,
   pickTargetAlbum,
 } from "./melon-live-client.js";
@@ -20,6 +21,27 @@ test("parses the first artist search result", () => {
   assert.deepEqual(artist, {
     artistId: "3679688",
     name: "TWS (투어스)",
+  });
+});
+
+test("parses a Melon song detail page", () => {
+  const result = parseSongDetailPage(`
+    <div class="section_info"><div class="song_name"><strong class="none">곡명</strong>OMG!</div>
+    <a href="javascript:melon.link.goArtistDetail('4708940')" title="ALPHA DRIVE ONE (알파드라이브원)" class="artist_name"><span>artist</span></a>
+    <dt>앨범</dt><dd><a href="javascript:melon.link.goAlbumDetail('13624538');">UNBREAKABLE&nbsp;:&nbsp;少年BEAST</a></dd>
+    <dt>발매일</dt><dd>2026.05.26</dd><div class="section_lyric"></div>
+    <script type="application/ld+json">{"image":"https://cdnimg.melon.co.kr/cm2/album/images/136/24/538/13624538_20260824132802.jpg"}</script>
+  `, "602070462");
+
+  assert.deepEqual(result, {
+    songId: "602070462",
+    title: "OMG!",
+    artistId: "4708940",
+    artist: "ALPHA DRIVE ONE (알파드라이브원)",
+    albumId: "13624538",
+    album: "UNBREAKABLE : 少年BEAST",
+    coverUrl: "https://cdnimg.melon.co.kr/cm2/album/images/136/24/538/13624538_20260824132802.jpg",
+    releaseDate: "2026.05.26",
   });
 });
 

@@ -27,11 +27,11 @@ test("lists the available feature modules", () => {
 
   assert.deepEqual(
     modules.map((module) => module.id),
-    ["album_source", "melon_identity", "single_source"],
+    ["album_source", "melon_identity", "single_source", "download_list"],
   );
   assert.deepEqual(
     modules.map((module) => module.label),
-    ["专辑音源", "melon实名", "单曲音源"],
+    ["专辑音源", "melon实名", "单曲音源", "下载列表"],
   );
 });
 

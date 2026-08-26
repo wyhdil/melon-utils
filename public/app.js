@@ -255,6 +255,10 @@ function getDefaultModulePrompt(module) {
     return "当前模块：单曲音源。可以输入：tws，널 따라가 (You, You)。";
   }
 
+  if (module.id === "download_list") {
+    return "当前模块：下载列表。输入一个或多个 songId，可用逗号、空格或换行分隔。";
+  }
+
   if (module.id === "avatar_change") {
     return "当前模块：更换头像。请先在本地 .env 配置 MELON_COOKIE，然后选择图片自动上传。";
   }
@@ -273,6 +277,10 @@ function getModuleExample(moduleId) {
 
   if (moduleId === "single_source") {
     return "例如：itzy, 달라달라，199";
+  }
+
+  if (moduleId === "download_list") {
+    return "例如：602070462, 602070463";
   }
 
   return "输入 Melon 相关任务...";

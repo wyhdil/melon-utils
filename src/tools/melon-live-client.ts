@@ -36,6 +36,17 @@ export type MelonSongSearchResult = {
   releaseDate?: string;
 };
 
+export type MelonSongDetail = {
+  songId: string;
+  title: string;
+  artistId: string;
+  artist: string;
+  albumId: string;
+  album: string;
+  coverUrl: string;
+  releaseDate?: string;
+};
+
 const melonBaseUrl = "https://www.melon.com";
 const requestHeaders = {
   "user-agent":
@@ -101,6 +112,52 @@ export async function searchSong(artistQuery: string, songTitle: string): Promis
   }
 
   return searchSongFromArtistAlbums(artistQuery, songTitle);
+}
+
+export async function fetchSongDetail(songId: string): Promise<MelonSongDetail> {
+  if (!/^\d{5,12}$/.test(songId)) {
+    throw new Error(`Invalid Melon songId: ${songId}`);
+  }
+
+  const url = `${melonBaseUrl}/song/detail.htm?songId=${encodeURIComponent(songId)}`;
+  return parseSongDetailPage(await fetchMelonText(url), songId);
+}
+
+export function parseSongDetailPage(html: string, songId: string): MelonSongDetail {
+  const detail = html.match(/<div class="section_info">[\s\S]*?<div class="section_(?:lyric|prdcr)/)?.[0] ?? html;
+  const title = detail.match(
+    /<div class="song_name">[\s\S]*?<strong[^>]*>곡명<\/strong>(?<title>[\s\S]*?)<\/div>/,
+  )?.groups?.title;
+  const artist = detail.match(
+    /goArtistDetail\('(?<artistId>\d+)'\)[^>]*title="(?<artist>[^"]+)"[^>]*class="artist_name"/,
+  )?.groups;
+  const album = detail.match(
+    /<dt>앨범<\/dt>\s*<dd><a[^>]*goAlbumDetail\('(?<albumId>\d+)'\)[^>]*>(?<album>[\s\S]*?)<\/a><\/dd>/,
+  )?.groups;
+  const releaseDate = detail.match(
+    /<dt>발매일<\/dt>\s*<dd>(?<date>\d{4}\.\d{2}\.\d{2})<\/dd>/,
+  )?.groups?.date;
+  const rawCover =
+    html.match(/"image"\s*:\s*"(?<url>https:\/\/cdnimg\.melon\.co\.kr\/[^"]+)"/)?.groups?.url ??
+    html.match(/<meta property="og:image" content="(?<url>[^"]+)"/)?.groups?.url;
+
+  if (!title || !artist?.artistId || !artist.artist || !album?.albumId || !album.album || !rawCover) {
+    throw new Error(`Unable to parse Melon song detail page for ${songId}.`);
+  }
+
+  return {
+    songId,
+    title: cleanTitle(title),
+    artistId: artist.artistId,
+    artist: cleanTitle(artist.artist),
+    albumId: album.albumId,
+    album: cleanTitle(album.album),
+    coverUrl: rawCover
+      .replace(/_500(?=\.jpg(?:$|\?))/, "")
+      .replace(/[?].*$/, "")
+      .replace(/\/melon\/.*$/, ""),
+    ...(releaseDate ? { releaseDate } : {}),
+  };
 }
 
 export async function fetchLatestAlbumTitleTrack(

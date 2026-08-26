@@ -1,4 +1,4 @@
-export type FeatureModuleId = "album_source" | "melon_identity" | "single_source";
+export type FeatureModuleId = "album_source" | "melon_identity" | "single_source" | "download_list";
 
 export type FeatureModule = {
   id: FeatureModuleId;
@@ -24,6 +24,12 @@ export const featureModules: FeatureModule[] = [
     id: "single_source",
     label: "单曲音源",
     description: "按歌手和歌曲名查询 Melon songId，并生成可匹配的单曲音源规则。",
+    status: "available",
+  },
+  {
+    id: "download_list",
+    label: "下载列表",
+    description: "输入一个或多个 Melon songId，生成可覆盖空列表或已有购买列表的歌曲 HTML。",
     status: "available",
   },
 ];
