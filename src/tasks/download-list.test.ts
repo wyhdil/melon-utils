@@ -26,7 +26,9 @@ test("generates copyable regex and batch list HTML", async () => {
   assert.match(result.output, /```html/);
   assert.match(result.output, /class="switch_toggle col2"/);
   assert.match(result.output, /id="check_all_btn"/);
+  assert.match(result.output, /var sortVal = 'FIRST_DL_DATE'/);
   assert.match(result.output, /<ul class="service_list is_check list_music webview_more" id="_mList">/);
+  assert.match(result.output, /finishedPageLoad\(2,25\)/);
   assert.match(result.output, /id="602070462"/);
   assert.match(result.output, /id="602070463"/);
 });
@@ -50,4 +52,7 @@ test("escapes metadata when rendering list items", () => {
   assert.match(html, /value="It&#39;s album"/);
   assert.match(html, /class="sprite play small hide play_btn"/);
   assert.match(html, /__appContentPlayInMyBoxList\('1000000340','1','602070462'\)/);
+  assert.match(html, /ontouchstart="touchStartHandler\(event, 'song', this\);"/);
+  assert.match(html, /onclick="selectConts\(\$\(this\), '', 'songid'\)"/);
+  assert.match(html, /onclick="sidePop\(this, 'song'\);"/);
 });

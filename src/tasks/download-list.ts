@@ -84,6 +84,18 @@ export function renderDownloadPanel(songs: MelonSongDetail[]): string {
   <li class="item">MP3 이용권으로 다운로드, 개별곡 구매, 앨범구매 한 곡은 평생 소유할 수 있으며, 재생 유효기간은 무제한입니다.</li>
   <li class="item">구매목록 보관기간은 최초 구매일로부터 1년입니다.</li>
  </ul>
+ <script type="text/javascript">
+  var sortVal = 'FIRST_DL_DATE';
+  if (listCode != 'SONGST' && listCode != 'MVST') {
+   if (sortVal == '' || sortVal == 'FIRST_DL_DATE') {
+    $('.selected').text('최신순');
+   } else if (sortVal == 'SONG_NAME') {
+    $('.selected').text('가나다순');
+   } else {
+    $('.selected').text('아티스트순');
+   }
+  }
+ </script>
  <form name="streamForm" id="streamForm" method="post">
   <input type="hidden" name="menuId" value="1000000340" />
   <input type="hidden" name="contsType" value="3C0001" />
@@ -91,6 +103,7 @@ export function renderDownloadPanel(songs: MelonSongDetail[]): string {
   <input type="hidden" name="buyType" value="5" />
   <ul class="service_list is_check list_music webview_more" id="_mList">
 ${songs.map(renderDownloadListItem).join("\n\n")}
+   <script type="text/javascript">finishedPageLoad(${songs.length},25);</script>
   </ul>
  </form>
 </div>
@@ -102,7 +115,7 @@ export function renderDownloadListItem(song: MelonSongDetail): string {
   const artist = escapeHtml(song.artist);
   const coverUrl = escapeHtmlAttribute(song.coverUrl);
 
-  return `<li id="${song.songId}" albumId="${song.albumId}" artistId="${song.artistId}" class="list_item" avail-data="true">
+  return `<li id="${song.songId}" albumId="${song.albumId}" artistId="${song.artistId}" class="list_item" ontouchstart="touchStartHandler(event, 'song', this);" ontouchend="touchEndHandler(event);" ontouchmove="touchMoveHandler(event);" avail-data="true">
  <div class="thumb">
   <div class="inner">
    <span class="img" style="background-image:url('${coverUrl}')"></span>
