@@ -22,22 +22,24 @@ test("generates copyable regex and batch list HTML", async () => {
 
   assert.equal(result.status, "ok");
   assert.match(result.output, /```regex/);
-  assert.match(result.output, /_mList/);
+  assert.match(result.output, /tabpanel3/);
   assert.match(result.output, /```html/);
+  assert.match(result.output, /class="switch_toggle col2"/);
+  assert.match(result.output, /id="check_all_btn"/);
   assert.match(result.output, /<ul class="service_list is_check list_music webview_more" id="_mList">/);
   assert.match(result.output, /id="602070462"/);
   assert.match(result.output, /id="602070463"/);
 });
 
-test("generated regex matches empty and populated Melon lists", async () => {
+test("generated regex matches empty and populated Melon download panels", async () => {
   const task = createDownloadListTask(async () => song);
   const result = await task.run(song.songId);
   const pattern = result.output.match(/```regex\n(?<pattern>[\s\S]*?)\n```/)?.groups?.pattern;
 
   assert.ok(pattern);
   const regex = new RegExp(pattern);
-  assert.match('<ul class="service_list" id="_mList"><div class="empty_list"><p>empty</p></div></ul>', regex);
-  assert.match('<ul id="_mList" class="service_list"><li id="111">old song</li><li id="222">old song</li></ul>', regex);
+  assert.match('<div class="inner_cont" id="tabpanel3"><ul id="_mList"><div class="empty_list">empty</div></ul></div></div><div class="melon-modal">', regex);
+  assert.match('<div class="inner_cont" id="tabpanel3"><ul class="switch_toggle"></ul><ul id="_mList"><li>old song</li></ul></div></div>\n<div class="melon-modal">', regex);
 });
 
 test("escapes metadata when rendering list items", () => {
@@ -46,4 +48,6 @@ test("escapes metadata when rendering list items", () => {
   assert.match(html, /A &lt; B &amp; "C"/);
   assert.match(html, /value="A &lt; B &amp; &quot;C&quot;"/);
   assert.match(html, /value="It&#39;s album"/);
+  assert.match(html, /class="sprite play small hide play_btn"/);
+  assert.match(html, /__appContentPlayInMyBoxList\('1000000340','1','602070462'\)/);
 });
